@@ -115,7 +115,7 @@ function SignUpUser() {
         });
 
         if (response.status === 201) {
-          login();
+          login(registerData.email);
           navigate('/');
         } else {
           console.error('Registration failed');

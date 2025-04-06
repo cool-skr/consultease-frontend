@@ -42,7 +42,7 @@ function Login() {
       });
 
       if (response.ok) {
-        login(); 
+        login(formValues.email); 
         navigate('/');
       } else {
         console.error('Login failed');

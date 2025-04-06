@@ -1,43 +1,52 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Form, Input, DatePicker, Upload, Button, InputNumber, message, Typography as AntTypography, Select } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { AppBar, Toolbar, Typography as MuiTypography } from '@mui/material';
+import axios from 'axios';
 
 const { TextArea } = Input;
 const { Title } = AntTypography;
 
 const ProjectForm = () => {
   const [form] = Form.useForm();
-  const [formData, setFormData] = useState({});
-  const [uploading, setUploading] = useState(false);
 
   const onFinish = async (values) => {
     try {
-      setUploading(true);
       const formDataToSubmit = new FormData();
       
+      const userEmail = localStorage.getItem('email');
+      formDataToSubmit.append('email', userEmail);
+      
       Object.keys(values).forEach(key => {
-        if (key === 'billSettlement' || key === 'agreement') {
-          if (values[key]?.fileList?.[0]?.originFileObj) {
-            formDataToSubmit.append(key, values[key].fileList[0].originFileObj);
+        if (key === 'projectDuration') {
+          const [start, end] = values[key];
+          formDataToSubmit.append(key, `${start.format('MMM YYYY')} - ${end.format('MMM YYYY')}`);
+        } else if (key === 'billSettlement' || key === 'agreement') {
+          if (values[key]?.fileList?.length > 0) {
+            values[key].fileList.forEach((file, index) => {
+              formDataToSubmit.append(`${key}`, file.originFileObj);
+            });
           }
         } else {
           formDataToSubmit.append(key, values[key]);
         }
       });
 
-      setFormData(values);
-      
-      console.log('Form data ready for submission:', formDataToSubmit);
-      // TODO: Add your API call here
-      // await axios.post('/api/projects', formDataToSubmit);
-      
-      message.success('Project details submitted successfully!');
+      // Make API call
+      const response = await axios.post('http://localhost:5000/project/submit', formDataToSubmit, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data) {
+        message.success('Project details submitted successfully!');
+        form.resetFields();
+      }
     } catch (error) {
       message.error('Failed to submit project details');
       console.error('Submission error:', error);
     } finally {
-      setUploading(false);
     }
   };
 
@@ -55,7 +64,8 @@ const ProjectForm = () => {
       } else if (info.file.status === 'error') {
         message.error(`${info.file.name} file upload failed`);
       }
-    }
+    },
+    multiple: true
   };
 
   const yearOptions = Array.from({ length: 101 }, (_, i) => ({

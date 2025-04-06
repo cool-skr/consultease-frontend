@@ -7,14 +7,16 @@ export const AuthProvider = ({ children }) => {
     return localStorage.getItem('isLoggedIn') === 'true';
   });
 
-  const login = () => {
+  const login = (data) => {
     setIsLoggedIn(true);
     localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('email', data);
   };
 
   const logout = () => {
     setIsLoggedIn(false);
     localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('email');
   };
 
   return (
