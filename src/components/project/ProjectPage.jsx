@@ -5,7 +5,7 @@ import axios from 'axios';
 import { message } from 'antd';
 import DownloadIcon from '@mui/icons-material/Download';
 import EditIcon from '@mui/icons-material/Edit';
-
+import Loading from '../common/Loading';
 const ProjectPage = () => {
   const { projectId } = useParams();
   const [project, setProject] = useState(null);
@@ -35,8 +35,8 @@ const ProjectPage = () => {
   
   return (
     loading ? (
-      <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
-        <Typography variant="h5">Loading project details...</Typography>
+      <Box sx={{ p: 40, display: 'flex', justifyContent: 'center' }}>
+        <Loading />
       </Box>
     ) : !project ? (
       <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>

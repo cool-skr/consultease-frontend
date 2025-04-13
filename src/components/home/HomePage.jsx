@@ -5,10 +5,15 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ProjectCard from './ProjectCard';
 import axios from 'axios';
+import SearchBar from './SearchBar';
+import Loading from '../common/Loading';
+// Replace BudgetFilter import with:
+import Filters from './Filters';
 
 const HomePage = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filteredProjects, setFilteredProjects] = useState([]);
   const navigate = useNavigate();
   const { logout } = useAuth();
 
@@ -28,17 +33,17 @@ const HomePage = () => {
         setLoading(false);
       }
     };
-
     fetchProjects();
   }, []);
-
+  useEffect(() => {
+    setFilteredProjects(projects);
+  }, [projects]);
   const handleLogout = async (e) => {
     e.preventDefault();
     logout();
     navigate('/login'); 
   }
   
-
   return (
     <Box sx={{ flexGrow: 1, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       <AppBar 
@@ -58,23 +63,18 @@ const HomePage = () => {
                   letterSpacing: '1px',
                   fontFamily: 'system-ui',
                   cursor: 'pointer',
-                  '&:hover': {
-                    opacity: 0.8
-                  }
+                  '&:hover': { opacity: 0.8 }
                 }}
               >
                 ConsultEase
               </Typography>
-
               <Button 
                 color="inherit" 
                 onClick={handleLogout}
                 sx={{
                   textTransform: 'none',
                   fontSize: '1rem',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                  }
+                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
                 }}
               >
                 Logout
@@ -82,42 +82,54 @@ const HomePage = () => {
             </Toolbar>
           </AppBar>
 
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Welcome to ConsultEase
-        </Typography>
-      </Box>
-      
       <Box sx={{ p: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-          <Typography variant="h4" sx={{ fontWeight: 500 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center',
+          mb: 4,
+          gap: 3
+        }}>
+          <Typography variant="h4" sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>
             Research Projects
           </Typography>
-          <Fab 
-            color="primary" 
-            aria-label="add project"
-            onClick={() => navigate('/project/new')}
-            sx={{
-              backgroundColor: '#000000',
-              '&:hover': {
-                backgroundColor: '#333333'
-              }
-            }}
-          >
-            <AddIcon />
-          </Fab>
+          <Box sx={{ flexGrow: 1, maxWidth: '500px' }}>
+            <SearchBar 
+              projects={projects} 
+              setProjects={setFilteredProjects} 
+            />
+          </Box>
         </Box>
 
+        <Filters projects={projects} setFilteredProjects={setFilteredProjects} />
+
         {loading ? (
-          <Typography>Loading projects...</Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
+            <Loading />
+          </Box>
         ) : (
-          <Grid container spacing={3}>
-            {projects.map((project) => (
-              <Grid item xs={12} sm={6} md={4} key={project.id}>
-                <ProjectCard project={project} />
-              </Grid>
-            ))}
-          </Grid>
+          <>
+            <Grid container spacing={3}>
+              {filteredProjects.map((project) => (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={project.id}>
+                  <ProjectCard project={project} />
+                </Grid>
+              ))}
+            </Grid>
+            <Fab 
+              color="primary" 
+              aria-label="add project"
+              onClick={() => navigate('/project/new')}
+              sx={{
+                position: 'fixed',
+                bottom: 32,
+                right: 32,
+                backgroundColor: '#000000',
+                '&:hover': { backgroundColor: '#333333' }
+              }}
+            >
+              <AddIcon />
+            </Fab>
+          </>
         )}
       </Box>
     </Box>
