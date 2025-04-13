@@ -7,7 +7,7 @@ import axios from 'axios';
 const { TextArea } = Input;
 const { Title } = AntTypography;
 
-const ProjectForm = () => {
+const ProjectEditPage = () => {
   const [form] = Form.useForm();
 
   const onFinish = async (values) => {
@@ -23,7 +23,7 @@ const ProjectForm = () => {
           formDataToSubmit.append(key, `${start.format('MMM YYYY')} - ${end.format('MMM YYYY')}`);
         } else if (key === 'billSettlement' || key === 'agreement') {
           if (values[key]?.fileList?.length > 0) {
-            values[key].fileList.forEach((file, ) => {
+            values[key].fileList.forEach((file) => {
               formDataToSubmit.append(`${key}`, file.originFileObj);
             });
           }
@@ -443,4 +443,4 @@ const ProjectForm = () => {
   );
 };
 
-export default ProjectForm;
+export default ProjectEditPage;

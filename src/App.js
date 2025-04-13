@@ -6,7 +6,8 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import SignUpUser from './components/signup/SignUpUser';
 import ProjectForm from './components/project/ProjectForm';
-
+import ProjectPage from "./components/project/ProjectPage";
+import ProjectEditPage from "./components/project/ProjectEditPage";
 function App() {
   return (
     <AuthProvider>
@@ -31,10 +32,18 @@ function App() {
             } 
           />
           <Route 
-            path="/project/:id" 
+            path="/project/:projectId" 
             element={
               <ProtectedRoute>
-                <HomePage />
+                <ProjectPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/project/edit/:projectId" 
+            element={
+              <ProtectedRoute>
+                <ProjectEditPage />
               </ProtectedRoute>
             } 
           />

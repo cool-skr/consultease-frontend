@@ -1,30 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, Button, Box, Grid, Fab } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ProjectCard from './ProjectCard';
+import axios from 'axios';
 
 const HomePage = () => {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { logout } = useAuth();
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const userEmail = localStorage.getItem('email');
+        const endpoint = (localStorage.getItem('admin') === 'true') 
+          ? 'http://localhost:5000/project/admin/fetch' 
+          : `http://localhost:5000/project/fetch/${userEmail}`;
+        
+        const response = await axios.get(endpoint);
+        setProjects(response.data);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
   const handleLogout = async (e) => {
     e.preventDefault();
     logout();
     navigate('/login'); 
   }
-  const projects = [
-    {
-      id: 1,
-      title: 'AI Healthcare Solutions',
-      industry: 'Healthcare',
-      duration: '12 months',
-      academicYear: '2023-24',
-      pi: 'Dr. Sarah Johnson',
-      summary: 'Development of AI-powered diagnostic tools for early disease detection in rural areas...',
-      amountSanctioned: '₹15,00,000'
-    },
-  ];
+  
 
   return (
     <Box sx={{ flexGrow: 1, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
@@ -95,13 +108,17 @@ const HomePage = () => {
           </Fab>
         </Box>
 
-        <Grid container spacing={3}>
-          {projects.map((project) => (
-            <Grid item xs={12} sm={6} md={4} key={project.id}>
-              <ProjectCard project={project} />
-            </Grid>
-          ))}
-        </Grid>
+        {loading ? (
+          <Typography>Loading projects...</Typography>
+        ) : (
+          <Grid container spacing={3}>
+            {projects.map((project) => (
+              <Grid item xs={12} sm={6} md={4} key={project.id}>
+                <ProjectCard project={project} />
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Box>
     </Box>
   );

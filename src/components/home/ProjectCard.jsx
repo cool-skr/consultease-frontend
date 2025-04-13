@@ -1,13 +1,37 @@
 import React from 'react';
-import { Card, CardContent, Typography, Grid, Chip, Box } from '@mui/material';
+import { Card, CardContent, Typography, Grid, Chip, Box, LinearProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import Button from '@mui/material/Button';
+import axios from 'axios';
+import { message } from 'antd';
 
 const ProjectCard = ({ project }) => {
   const navigate = useNavigate();
+  const progress = (project.amountReceived / project.amountSanctioned) * 100;
+
+  const handleMarkCompleted = async (e) => {
+    e.stopPropagation();
+    try {
+      const formData = new FormData();
+      formData.append('completed', 'yes');
+      
+      await axios.put(`http://localhost:5000/project/update/${project.projectId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      message.success('Project marked as completed successfully!');
+      window.location.reload(); 
+    } catch (error) {
+      console.error('Error updating project:', error);
+      message.error('Failed to mark project as completed');
+    }
+  };
 
   return (
     <Card 
-      onClick={() => navigate(`/project/${project.id}`)}
+      onClick={() => navigate(`/project/${project.projectId}`)}
       sx={{ 
         height: '100%',
         cursor: 'pointer',
@@ -39,7 +63,7 @@ const ProjectCard = ({ project }) => {
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ mb: 2.5 }}>
           <Chip 
-            label={project.industry} 
+            label={project.principalInvestigator} 
             size="small" 
             sx={{ 
               backgroundColor: '#000000',
@@ -59,7 +83,7 @@ const ProjectCard = ({ project }) => {
               color: '#1a1a1a'
             }}
           >
-            {project.title}
+            {project.projectTitle}
           </Typography>
         </Box>
         
@@ -73,7 +97,7 @@ const ProjectCard = ({ project }) => {
             gap: 0.5
           }}
         >
-          <span style={{ fontWeight: 600 }}>PI:</span> {project.pi}
+          <span style={{ fontWeight: 600 }}>Industry:</span> {project.industryName}
         </Typography>
         
         <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
@@ -82,34 +106,79 @@ const ProjectCard = ({ project }) => {
               Duration
             </Typography>
             <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 500 }}>
-              {project.duration}
+              {project.projectDuration}
             </Typography>
           </Grid>
           <Grid item xs={6}>
             <Typography variant="caption" sx={{ color: '#666666', fontWeight: 500 }}>
-              Amount
+              Progress
             </Typography>
-            <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 500 }}>
-              {project.amountSanctioned}
-            </Typography>
+            <LinearProgress 
+              variant="determinate" 
+              value={progress > 100 ? 100 : progress} 
+              sx={{ 
+                height: 8,
+                borderRadius: 5,
+                mt: 0.5,
+                backgroundColor: '#f0f0f0',
+                '& .MuiLinearProgress-bar': {
+                  backgroundColor: progress >= 100 ? '#4caf50' : '#000000'
+                }
+              }}
+            />
           </Grid>
         </Grid>
 
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            color: '#666666',
-            display: '-webkit-box',
-            overflow: 'hidden',
-            WebkitBoxOrient: 'vertical',
-            WebkitLineClamp: 2,
-            lineHeight: 1.5,
-            borderTop: '1px solid #f0f0f0',
-            pt: 2
-          }}
-        >
-          {project.summary}
-        </Typography>
+        {project.completed === 'yes' ? (
+          <Box sx={{ 
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            color: '#4caf50',
+            mt: 2,
+            pt: 2,
+            borderTop: '1px solid #f0f0f0'
+          }}>
+            <CheckCircleIcon fontSize="small" />
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              Completed
+            </Typography>
+          </Box>
+        ) : (
+          <Box sx={{ 
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1,
+            mt: 2,
+            pt: 2,
+            borderTop: '1px solid #f0f0f0'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#64b5f6' }}>
+              <CheckCircleIcon fontSize="small" />
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                Ongoing
+              </Typography>
+            </Box>
+            <Button 
+              variant="outlined" 
+              size="small" 
+              onClick={handleMarkCompleted}
+              sx={{ 
+                mt: 1,
+                alignSelf: 'flex-start',
+                color: '#4caf50',
+                borderColor: '#4caf50',
+                '&:hover': {
+                  backgroundColor: 'rgba(76, 175, 80, 0.04)',
+                  borderColor: '#4caf50'
+                }
+              }}
+            >
+              Mark Completed
+            </Button>
+          </Box>
+        )}
+
       </CardContent>
     </Card>
   );
