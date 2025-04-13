@@ -1,30 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Input, DatePicker, Upload, Button, InputNumber, message, Typography as AntTypography, Select } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { AppBar, Toolbar, Typography as MuiTypography } from '@mui/material';
 import axios from 'axios';
-
+import { useParams } from 'react-router-dom';
+import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
 const { TextArea } = Input;
 const { Title } = AntTypography;
 
 const ProjectEditPage = () => {
   const [form] = Form.useForm();
-
+  const [project, setProject] = useState([]);
+  const [billFiles, setBillFiles] = useState([]);
+  const [agreementFiles, setAgreementFiles] = useState([]);
+  const { projectId } = useParams();
+  const navigate = useNavigate();
   const onFinish = async (values) => {
     try {
       const formDataToSubmit = new FormData();
-      
+
       const userEmail = localStorage.getItem('email');
       formDataToSubmit.append('email', userEmail);
-      
+
       Object.keys(values).forEach(key => {
         if (key === 'projectDuration') {
           const [start, end] = values[key];
-          formDataToSubmit.append(key, `${start.format('MMM YYYY')} - ${end.format('MMM YYYY')}`);
+          formDataToSubmit.append(key, `${start.format('DD MMMM YYYY')} - ${end.format('DD MMMM YYYY')}`);
         } else if (key === 'billSettlement' || key === 'agreement') {
           if (values[key]?.fileList?.length > 0) {
             values[key].fileList.forEach((file) => {
-              formDataToSubmit.append(`${key}`, file.originFileObj);
+              if(!file.url)formDataToSubmit.append(`${key}`, file.originFileObj);
             });
           }
         } else {
@@ -32,7 +38,7 @@ const ProjectEditPage = () => {
         }
       });
 
-      const response = await axios.post('http://localhost:5000/project/submit', formDataToSubmit, {
+      const response = await axios.put('http://localhost:5000/project/update/'+projectId, formDataToSubmit, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -46,6 +52,7 @@ const ProjectEditPage = () => {
       message.error('Failed to submit project details');
       console.error('Submission error:', error);
     } finally {
+      navigate('/');
     }
   };
 
@@ -64,6 +71,11 @@ const ProjectEditPage = () => {
         message.error(`${info.file.name} file upload failed`);
       }
     },
+    customRequest: ({ onSuccess }) => {
+      setTimeout(() => {
+        onSuccess("ok");
+      }, 0);
+    },
     multiple: true
   };
 
@@ -71,35 +83,91 @@ const ProjectEditPage = () => {
     value: `${2000 + i}-${2001 + i}`,
     label: `${2000 + i}-${2001 + i}`
   }));
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/project/fetch/project/' + projectId);
+        setProject(response.data);
+      } catch (error) {
+        console.error('Error fetching project:', error);
+      }
+    };
+    fetchProject();
+    }, [projectId]); 
+    
+    useEffect(() => {
+    if (project && Object.keys(project).length > 0) {
+      form.setFieldsValue({
+        industryName: project.industryName,
+        projectTitle: project.projectTitle,
+        principalInvestigator: project.principalInvestigator,
+        coPrincipalInvestigator: project.coPrincipalInvestigator,
+        academicYear: project.academicYear,
+        amountSanctioned: project.amountSanctioned,
+        amountReceived: project.amountReceived,
+        studentDetails: project.studentDetails,
+        projectSummary: project.projectSummary,
+      });
+    }
+    if (project?.projectDuration) {
+      const [startStr, endStr] = project.projectDuration.split(' - ');
+      const startDate = dayjs(startStr, 'DD MMMM YYYY');
+      const endDate = dayjs(endStr, 'DD MMMM YYYY');
+
+      form.setFieldsValue({
+        projectDuration: [startDate, endDate]
+      });
+    }
+    if (project?.billSettlement) {
+      const links = project.billSettlement.split(',').map((link, index) => ({
+        uid: `bill-${index}`,
+        name: `bill-${index + 1}.pdf`,
+        status: 'done',
+        url: link.trim(),
+      }));
+      setBillFiles(links);
+    }
+    if (project?.agreement) {
+      const links = project.agreement.split(',').map((link, index) => ({
+        uid: `agreement-${index}`,
+        name: `agreement-${index + 1}.pdf`,
+        status: 'done',
+        url: link.trim(),
+      }));
+      setAgreementFiles(links); 
+    }
+
+  }, [project, form]); 
+
 
   return (
     <>
-      <AppBar position="static" sx={{ 
-            backgroundColor: '#000000', 
-            mb: 4,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          }}>
-            <Toolbar sx={{ 
-              height: '80px',
-              display: 'flex',
-              alignItems: 'center' 
-            }}>
-              <MuiTypography 
-                variant="h6" 
-                sx={{ 
-                  fontSize: '24px',
-                  fontWeight: 500,
-                  letterSpacing: '0.5px',
-                  background: 'linear-gradient(45deg, #fff, #e0e0e0)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}
-              >
-                New Project
-              </MuiTypography>
-            </Toolbar>
-          </AppBar>
-      
+      <AppBar position="static" sx={{
+        backgroundColor: '#000000',
+        mb: 4,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+      }}>
+        <Toolbar sx={{
+          height: '80px',
+          display: 'flex',
+          alignItems: 'center'
+        }}>
+          <MuiTypography
+            variant="h6"
+            sx={{
+              fontSize: '24px',
+              fontWeight: 500,
+              letterSpacing: '0.5px',
+              background: 'linear-gradient(45deg, #fff, #e0e0e0)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}
+          >
+            {project.projectTitle || ''}
+          </MuiTypography>
+        </Toolbar>
+      </AppBar>
+
       <Form
         form={form}
         layout="vertical"
@@ -113,10 +181,10 @@ const ProjectEditPage = () => {
           boxShadow: '0 10px 30px rgba(0,0,0,0.06)',
         }}
       >
-        <Title 
-          level={2} 
-          style={{ 
-            marginBottom: '50px', 
+        <Title
+          level={2}
+          style={{
+            marginBottom: '50px',
             textAlign: 'center',
             fontSize: '36px',
             fontWeight: 600,
@@ -126,7 +194,7 @@ const ProjectEditPage = () => {
             fontFamily: 'system-ui'
           }}
         >
-          Project Details
+          Edit Project Details
           <div style={{
             content: '""',
             position: 'absolute',
@@ -140,44 +208,45 @@ const ProjectEditPage = () => {
           }} />
         </Title>
 
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: '1fr 1fr', 
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
           gap: '30px',
-          marginBottom: '30px' 
+          marginBottom: '30px'
         }}>
           <Form.Item
             name="industryName"
-            label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Industry Name</span>}
+            label="Industry Name"
             rules={[{ required: true, message: 'Please enter industry name' }]}
           >
-            <Input 
-              size="large" 
-              style={{ 
+            <Input
+              size="large"
+              style={{
                 borderRadius: '10px',
                 padding: '12px 16px',
                 fontSize: '15px',
                 border: '1px solid #e8e8e8',
                 boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
               }}
             />
           </Form.Item>
+
 
           <Form.Item
             name="projectDuration"
             label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Duration of Project</span>}
             rules={[{ required: true, message: 'Please select project duration' }]}
           >
-            <DatePicker.RangePicker 
-              size="large" 
-              style={{ 
+            <DatePicker.RangePicker
+              size="large"
+              style={{
                 width: '100%',
                 borderRadius: '10px',
                 padding: '12px 16px',
                 border: '1px solid #e8e8e8',
                 boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
-              }} 
+              }}
             />
           </Form.Item>
         </div>
@@ -187,9 +256,9 @@ const ProjectEditPage = () => {
           label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Title of Project</span>}
           rules={[{ required: true, message: 'Please enter project title' }]}
         >
-          <Input 
-            size="large" 
-            style={{ 
+          <Input
+            size="large"
+            style={{
               borderRadius: '10px',
               padding: '12px 16px',
               fontSize: '15px',
@@ -200,20 +269,20 @@ const ProjectEditPage = () => {
           />
         </Form.Item>
 
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: '1fr 1fr', 
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
           gap: '30px',
-          marginBottom: '30px' 
+          marginBottom: '30px'
         }}>
           <Form.Item
             name="principalInvestigator"
             label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Principal Investigator (PI)</span>}
             rules={[{ required: true, message: 'Please enter PI details' }]}
           >
-            <Input 
-              size="large" 
-              style={{ 
+            <Input
+              size="large"
+              style={{
                 borderRadius: '10px',
                 padding: '12px 16px',
                 fontSize: '15px',
@@ -229,9 +298,9 @@ const ProjectEditPage = () => {
             label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Co-Principal Investigator (Co-PI)</span>}
             rules={[{ required: true, message: 'Please enter Co-PI details' }]}
           >
-            <Input 
-              size="large" 
-              style={{ 
+            <Input
+              size="large"
+              style={{
                 borderRadius: '10px',
                 padding: '12px 16px',
                 fontSize: '15px',
@@ -243,11 +312,11 @@ const ProjectEditPage = () => {
           </Form.Item>
         </div>
 
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: '1fr 1fr', 
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
           gap: '30px',
-          marginBottom: '30px' 
+          marginBottom: '30px'
         }}>
           <Form.Item
             name="academicYear"
@@ -260,7 +329,7 @@ const ProjectEditPage = () => {
               placeholder="Select Academic Year"
               options={yearOptions}
               defaultValue="2025-2026"
-              style={{ 
+              style={{
                 width: '100%',
                 borderRadius: '10px',
                 fontSize: '15px',
@@ -269,11 +338,11 @@ const ProjectEditPage = () => {
           </Form.Item>
         </div>
 
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: '1fr 1fr', 
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
           gap: '30px',
-          marginBottom: '30px' 
+          marginBottom: '30px'
         }}>
           <Form.Item
             name="amountSanctioned"
@@ -282,7 +351,7 @@ const ProjectEditPage = () => {
           >
             <InputNumber
               size="large"
-              style={{ 
+              style={{
                 width: '100%',
                 borderRadius: '10px',
                 padding: '8px 16px',
@@ -302,7 +371,7 @@ const ProjectEditPage = () => {
           >
             <InputNumber
               size="large"
-              style={{ 
+              style={{
                 width: '100%',
                 borderRadius: '10px',
                 padding: '8px 16px',
@@ -316,19 +385,20 @@ const ProjectEditPage = () => {
           </Form.Item>
         </div>
 
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: '1fr 1fr', 
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
           gap: '30px',
-          marginBottom: '30px' 
+          marginBottom: '30px'
         }}>
           <Form.Item
             name="billSettlement"
             label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Bill Settlement Details</span>}
-            rules={[{ required: true, message: 'Please upload bill settlement details' }]}
           >
-            <Upload {...uploadProps}>
-              <Button 
+            <Upload {...uploadProps} fileList={billFiles} onChange={info=>{
+              setBillFiles(info.fileList);
+            }}>
+              <Button
                 icon={<UploadOutlined />}
                 size="large"
                 style={{
@@ -352,10 +422,11 @@ const ProjectEditPage = () => {
           <Form.Item
             name="agreement"
             label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Signed Agreement Document</span>}
-            rules={[{ required: true, message: 'Please upload signed agreement' }]}
           >
-            <Upload {...uploadProps}>
-              <Button 
+            <Upload {...uploadProps} fileList={agreementFiles} onChange={(info)=>{
+              setAgreementFiles(info.fileList);
+            }}>
+              <Button
                 icon={<UploadOutlined />}
                 size="large"
                 style={{
@@ -380,10 +451,9 @@ const ProjectEditPage = () => {
         <Form.Item
           name="studentDetails"
           label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Student Details</span>}
-          rules={[{ required: true, message: 'Please enter student details' }]}
         >
-          <TextArea 
-            rows={4} 
+          <TextArea
+            rows={4}
             placeholder="Enter details of students involved in the project"
             style={{
               borderRadius: '10px',
@@ -400,12 +470,11 @@ const ProjectEditPage = () => {
           name="projectSummary"
           label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Project Summary</span>}
           rules={[
-            { required: true, message: 'Please enter project summary' },
             { max: 100, message: 'Summary should not exceed 100 words' }
           ]}
         >
-          <TextArea 
-            rows={4} 
+          <TextArea
+            rows={4}
             placeholder="Enter project summary (max 100 words)"
             style={{
               borderRadius: '10px',
@@ -419,8 +488,8 @@ const ProjectEditPage = () => {
         </Form.Item>
 
         <Form.Item>
-          <Button 
-            type="primary" 
+          <Button
+            type="primary"
             htmlType="submit"
             size="large"
             style={{

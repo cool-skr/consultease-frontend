@@ -3,13 +3,13 @@ import { Form, Input, DatePicker, Upload, Button, InputNumber, message, Typograp
 import { UploadOutlined } from '@ant-design/icons';
 import { AppBar, Toolbar, Typography as MuiTypography } from '@mui/material';
 import axios from 'axios';
-
+import { useNavigate } from 'react-router-dom';
 const { TextArea } = Input;
 const { Title } = AntTypography;
 
 const ProjectForm = () => {
   const [form] = Form.useForm();
-
+  const navigate = useNavigate();
   const onFinish = async (values) => {
     try {
       const formDataToSubmit = new FormData();
@@ -20,7 +20,7 @@ const ProjectForm = () => {
       Object.keys(values).forEach(key => {
         if (key === 'projectDuration') {
           const [start, end] = values[key];
-          formDataToSubmit.append(key, `${start.format('MMM YYYY')} - ${end.format('MMM YYYY')}`);
+          formDataToSubmit.append(key, `${start.format('DD MMMM YYYY')} - ${end.format('DD MMMM YYYY')}`);
         } else if (key === 'billSettlement' || key === 'agreement') {
           if (values[key]?.fileList?.length > 0) {
             values[key].fileList.forEach((file, ) => {
@@ -46,6 +46,7 @@ const ProjectForm = () => {
       message.error('Failed to submit project details');
       console.error('Submission error:', error);
     } finally {
+      navigate('/');
     }
   };
 
@@ -63,6 +64,11 @@ const ProjectForm = () => {
       } else if (info.file.status === 'error') {
         message.error(`${info.file.name} file upload failed`);
       }
+    },
+    customRequest: ({ onSuccess }) => {
+      setTimeout(() => {
+        onSuccess("ok");
+      }, 0);
     },
     multiple: true
   };
@@ -325,7 +331,6 @@ const ProjectForm = () => {
           <Form.Item
             name="billSettlement"
             label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Bill Settlement Details</span>}
-            rules={[{ required: true, message: 'Please upload bill settlement details' }]}
           >
             <Upload {...uploadProps}>
               <Button 
@@ -352,7 +357,6 @@ const ProjectForm = () => {
           <Form.Item
             name="agreement"
             label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Signed Agreement Document</span>}
-            rules={[{ required: true, message: 'Please upload signed agreement' }]}
           >
             <Upload {...uploadProps}>
               <Button 
@@ -380,7 +384,6 @@ const ProjectForm = () => {
         <Form.Item
           name="studentDetails"
           label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Student Details</span>}
-          rules={[{ required: true, message: 'Please enter student details' }]}
         >
           <TextArea 
             rows={4} 
@@ -400,7 +403,6 @@ const ProjectForm = () => {
           name="projectSummary"
           label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Project Summary</span>}
           rules={[
-            { required: true, message: 'Please enter project summary' },
             { max: 100, message: 'Summary should not exceed 100 words' }
           ]}
         >
