@@ -21,10 +21,10 @@ const HomePage = () => {
     const fetchProjects = async () => {
       try {
         const userEmail = localStorage.getItem('email');
-        const endpoint = (localStorage.getItem('admin') === 'true') 
-          ? 'http://localhost:5000/project/admin/fetch' 
+        const endpoint = (localStorage.getItem('admin') === 'true')
+          ? 'http://localhost:5000/project/admin/fetch'
           : `http://localhost:5000/project/fetch/${userEmail}`;
-        
+
         const response = await axios.get(endpoint);
         setProjects(response.data);
       } catch (error) {
@@ -41,50 +41,50 @@ const HomePage = () => {
   const handleLogout = async (e) => {
     e.preventDefault();
     logout();
-    navigate('/login'); 
+    navigate('/login');
   }
-  
+
   return (
     <Box sx={{ flexGrow: 1, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
-      <AppBar 
-            position="static" 
-            sx={{ 
-              backgroundColor: '#000000',
-              height: '70px',
+      <AppBar
+        position="static"
+        sx={{
+          backgroundColor: '#000000',
+          height: '70px',
+        }}
+      >
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Typography
+            variant="h5"
+            onClick={() => navigate('/')}
+            sx={{
+              color: '#ffffff',
+              fontWeight: 500,
+              letterSpacing: '1px',
+              fontFamily: 'system-ui',
+              cursor: 'pointer',
+              '&:hover': { opacity: 0.8 }
             }}
           >
-            <Toolbar sx={{ justifyContent: 'space-between' }}>
-              <Typography
-                variant="h5"
-                onClick={() => navigate('/')}
-                sx={{
-                  color: '#ffffff',
-                  fontWeight: 500,
-                  letterSpacing: '1px',
-                  fontFamily: 'system-ui',
-                  cursor: 'pointer',
-                  '&:hover': { opacity: 0.8 }
-                }}
-              >
-                ConsultEase
-              </Typography>
-              <Button 
-                color="inherit" 
-                onClick={handleLogout}
-                sx={{
-                  textTransform: 'none',
-                  fontSize: '1rem',
-                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
-                }}
-              >
-                Logout
-              </Button>
-            </Toolbar>
-          </AppBar>
+            ConsultEase
+          </Typography>
+          <Button
+            color="inherit"
+            onClick={handleLogout}
+            sx={{
+              textTransform: 'none',
+              fontSize: '1rem',
+              '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
+            }}
+          >
+            Logout
+          </Button>
+        </Toolbar>
+      </AppBar>
 
       <Box sx={{ p: 4 }}>
-        <Box sx={{ 
-          display: 'flex', 
+        <Box sx={{
+          display: 'flex',
           alignItems: 'center',
           mb: 4,
           gap: 3
@@ -93,9 +93,9 @@ const HomePage = () => {
             Research Projects
           </Typography>
           <Box sx={{ flexGrow: 1, maxWidth: '500px' }}>
-            <SearchBar 
-              projects={projects} 
-              setProjects={setFilteredProjects} 
+            <SearchBar
+              projects={projects}
+              setProjects={setFilteredProjects}
             />
           </Box>
         </Box>
@@ -115,8 +115,8 @@ const HomePage = () => {
                 </Grid>
               ))}
             </Grid>
-            <Fab 
-              color="primary" 
+            <Fab
+              color="primary"
               aria-label="add project"
               onClick={() => navigate('/project/new')}
               sx={{

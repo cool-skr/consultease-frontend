@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams,useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Grid, Chip, LinearProgress, Paper, Button, IconButton } from '@mui/material';
 import axios from 'axios';
 import { message } from 'antd';
@@ -29,10 +29,10 @@ const ProjectPage = () => {
   }, [projectId]);
   useEffect(() => {
     if (project) {
-        setProgress((project.amountReceived / project.amountSanctioned) * 100);
-      }; 
-    },[project])
-  
+      setProgress((project.amountReceived / project.amountSanctioned) * 100);
+    };
+  }, [project])
+
   return (
     loading ? (
       <Box sx={{ p: 40, display: 'flex', justifyContent: 'center' }}>
@@ -43,24 +43,24 @@ const ProjectPage = () => {
         <Typography variant="h5" color="error">Project not found</Typography>
       </Box>
     ) : (
-      <Box sx={{ 
-        p: { xs: 2, md: 4 }, 
-        maxWidth: 1200, 
+      <Box sx={{
+        p: { xs: 2, md: 4 },
+        maxWidth: 1200,
         margin: '0 auto',
         backgroundColor: '#f8f9fa',
         minHeight: '100vh'
       }}>
-        <Paper 
-          elevation={3} 
-          sx={{ 
-            p: { xs: 2, md: 4 }, 
+        <Paper
+          elevation={3}
+          sx={{
+            p: { xs: 2, md: 4 },
             borderRadius: 3,
             background: 'linear-gradient(to bottom, #ffffff, #fafafa)',
             border: '1px solid #eaeaea',
             position: 'relative'  // Added for absolute positioning of edit button
           }}
         >
-          <IconButton 
+          <IconButton
             onClick={() => navigate(`/project/edit/${project.projectId}`)}
             sx={{
               position: 'absolute',
@@ -76,10 +76,10 @@ const ProjectPage = () => {
             <EditIcon />
           </IconButton>
           <Box sx={{ mb: 5 }}>
-            <Chip 
-              label={project.completed === 'yes' ? 'Completed' : 'Ongoing'} 
+            <Chip
+              label={project.completed === 'yes' ? 'Completed' : 'Ongoing'}
               color={project.completed === 'yes' ? 'success' : 'primary'}
-              sx={{ 
+              sx={{
                 mb: 2,
                 px: 2,
                 py: 1,
@@ -88,10 +88,10 @@ const ProjectPage = () => {
                 borderRadius: '8px'
               }}
             />
-            <Typography 
-              variant="h3" 
-              sx={{ 
-                mb: 2, 
+            <Typography
+              variant="h3"
+              sx={{
+                mb: 2,
                 fontWeight: 700,
                 background: 'linear-gradient(45deg, #1a237e, #0d47a1)',
                 backgroundClip: 'text',
@@ -101,9 +101,9 @@ const ProjectPage = () => {
             >
               {project.projectTitle}
             </Typography>
-            <Typography 
-              variant="h6" 
-              sx={{ 
+            <Typography
+              variant="h6"
+              sx={{
                 color: 'text.secondary',
                 fontWeight: 500
               }}
@@ -114,10 +114,10 @@ const ProjectPage = () => {
 
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
-              <Paper 
-                elevation={1} 
-                sx={{ 
-                  p: 3, 
+              <Paper
+                elevation={1}
+                sx={{
+                  p: 3,
                   borderRadius: 2,
                   height: '100%',
                   border: '1px solid #eaeaea'
@@ -146,12 +146,12 @@ const ProjectPage = () => {
                 </Box>
               </Paper>
             </Grid>
-  
+
             <Grid item xs={12} md={6}>
-              <Paper 
-                elevation={1} 
-                sx={{ 
-                  p: 3, 
+              <Paper
+                elevation={1}
+                sx={{
+                  p: 3,
                   borderRadius: 2,
                   height: '100%',
                   border: '1px solid #eaeaea'
@@ -171,11 +171,11 @@ const ProjectPage = () => {
                   </Box>
                   <Box>
                     <Typography variant="subtitle2" color="text.secondary">Progress</Typography>
-                    <LinearProgress 
-                      variant="determinate" 
+                    <LinearProgress
+                      variant="determinate"
                       value={progress > 100 ? 100 : progress}
-                      sx={{ 
-                        height: 12, 
+                      sx={{
+                        height: 12,
                         borderRadius: 6,
                         mt: 2,
                         backgroundColor: 'rgba(0,0,0,0.05)',
@@ -189,12 +189,12 @@ const ProjectPage = () => {
                 </Box>
               </Paper>
             </Grid>
-  
+
             <Grid item xs={12}>
-              <Paper 
-                elevation={1} 
-                sx={{ 
-                  p: 3, 
+              <Paper
+                elevation={1}
+                sx={{
+                  p: 3,
                   borderRadius: 2,
                   border: '1px solid #eaeaea'
                 }}
@@ -205,29 +205,29 @@ const ProjectPage = () => {
                 <Typography sx={{ lineHeight: 1.8 }}>{project.projectSummary}</Typography>
               </Paper>
             </Grid>
-  
+
             <Grid item xs={12}>
-              <Paper 
-                elevation={1} 
-                sx={{ 
-                  p: 3, 
+              <Paper
+                elevation={1}
+                sx={{
+                  p: 3,
                   borderRadius: 2,
                   border: '1px solid #eaeaea',
-                  mt: 4  
+                  mt: 4
                 }}
               >
                 <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#1a237e' }}>
                   Documents
                 </Typography>
-                <Box sx={{ 
-                  display: 'flex', 
+                <Box sx={{
+                  display: 'flex',
                   gap: 3,
-                  flexWrap: 'wrap'  
+                  flexWrap: 'wrap'
                 }}>
                   {project.billSettlement?.split(',').map((link, index) => (
-                    <Button 
+                    <Button
                       key={`bill-${index}`}
-                      variant="outlined" 
+                      variant="outlined"
                       startIcon={<DownloadIcon />}
                       href={link.trim()}
                       target="_blank"
@@ -247,9 +247,9 @@ const ProjectPage = () => {
                     </Button>
                   ))}
                   {project.agreement?.split(',').map((link, index) => (
-                    <Button 
+                    <Button
                       key={`agreement-${index}`}
-                      variant="outlined" 
+                      variant="outlined"
                       startIcon={<DownloadIcon />}
                       href={link.trim()}
                       target="_blank"
