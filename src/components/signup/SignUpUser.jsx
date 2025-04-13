@@ -22,10 +22,9 @@ function SignUpUser() {
     password: '',
     confirmPassword: '',
     isAdmin: false,
-    passkey: '',
+    adminKey: '',
   });
 
-  const [passkeyError, setPasskeyError] = useState('');
 
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -54,14 +53,7 @@ function SignUpUser() {
     return true;
   };
 
-  const validatePasskey = (passkey) => {
-    if (formValues.isAdmin && passkey !== '123okshamba') {
-      setPasskeyError('Invalid admin passkey');
-      return false;
-    }
-    setPasskeyError('');
-    return true;
-  };
+  
 
   const getData = (e) => {
     const { value, name, type, checked } = e.target;
@@ -70,9 +62,7 @@ function SignUpUser() {
       [name]: type === 'checkbox' ? checked : value,
     }));
 
-    if (name === 'passkey') {
-      validatePasskey(value);
-    }
+    
     if (name === 'email') {
       validateEmail(value);
     }
@@ -99,29 +89,58 @@ function SignUpUser() {
       return;
     }
     else {
-      try {
-        const registerData = {
-          username: formValues.username,
-          password: formValues.password,
-          email: formValues.email
-        };
+      if(!formValues.isAdmin) {
+        try {
+          const registerData = {
+            username: formValues.username,
+            password: formValues.password,
+            email: formValues.email
+          };
 
-        const response = await fetch('http://localhost:5000/user/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(registerData),
-        });
+          const response = await fetch('http://localhost:5000/user/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(registerData),
+          });
 
-        if (response.status === 201) {
-          login(registerData.email);
-          navigate('/');
-        } else {
-          console.error('Registration failed');
+          if (response.status === 201) {
+            login(registerData.email);
+            navigate('/');
+          } else {
+            console.error('Registration failed');
+          }
+        } catch (error) {
+          console.error('Error:', error);
         }
-      } catch (error) {
-        console.error('Error:', error);
+      }
+      else {
+        try {
+          const registerData = {
+            username: formValues.username,
+            password: formValues.password,
+            email: formValues.email,
+            adminKey: formValues.adminKey,
+          };
+  
+          const response = await fetch('http://localhost:5000/admin/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(registerData),
+          });
+  
+          if (response.status === 201) {
+            login(registerData.email,'true');
+            navigate('/');
+          } else {
+            console.error('Registration failed');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
       }
     }
   }
@@ -228,13 +247,11 @@ function SignUpUser() {
                 margin="dense"
                 required
                 fullWidth
-                name="passkey"
+                name="adminKey"
                 label="Admin Passkey"
                 type="password"
                 sx={{ mb: 1 }}
                 onChange={getData}
-                error={!!passkeyError}
-                helperText={passkeyError}
               />
             )}
             

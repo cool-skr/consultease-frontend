@@ -7,14 +7,17 @@ import {
   Typography,
   TextField,
   Paper,
+  FormControlLabel,  
+  Checkbox          
 } from '@mui/material';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../../assets/logo.png';
-import { useAuth } from '../../context/AuthContext.jsx';  
+import { useAuth } from '../../context/AuthContext.jsx';
 
 function Login() {
   const { login } = useAuth();
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
   const [formValues, setFormValues] = useState({
     email: '',
     password: '',
@@ -32,28 +35,50 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch('http://localhost:5000/user/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formValues),
-      });
+    if (!isAdminLogin) {
+      try {
+        const response = await fetch('http://localhost:5000/user/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formValues),
+        });
 
-      if (response.ok) {
-        login(formValues.email); 
-        navigate('/');
-      } else {
-        console.error('Login failed');
+        if (response.ok) {
+          login(formValues.email);
+          navigate('/');
+        } else {
+          console.error('Login failed');
+        }
+      } catch (error) {
+        console.error('Error:', error);
       }
-    } catch (error) {
-      console.error('Error:', error);
+    }
+    else {
+      try {
+        const response = await fetch('http://localhost:5000/admin/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formValues),
+        });
+
+        if (response.ok) {
+          login(formValues.email, 'true');
+          navigate('/');
+        } else {
+          console.error('Login failed');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
     }
   };
 
   return (
-    
+
     <Container component="main" maxWidth="xs">
       <Box
         sx={{
@@ -121,6 +146,18 @@ function Login() {
               onChange={getData}
               sx={{ mb: 2 }}
             />
+            <FormControlLabel
+              control={<Checkbox
+                checked={isAdminLogin}
+                onChange={
+                  () => {
+                    setIsAdminLogin((prev) => !prev);
+                  }
+                }
+                color="primary" />}
+              label="Log in as Admin"
+              sx={{ mb: 1 }}
+            />
             <Button
               type="submit"
               fullWidth
@@ -150,8 +187,8 @@ function Login() {
             >
               <Typography variant="body2">
                 Don't have an account?{' '}
-                <Link 
-                  onClick={() => navigate('/signup')} 
+                <Link
+                  onClick={() => navigate('/signup')}
                   sx={{ textDecoration: 'none', fontWeight: 600, cursor: 'pointer' }}
                 >
                   Sign Up
