@@ -5,13 +5,15 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Button from '@mui/material/Button';
 import axios from 'axios';
 import { message } from 'antd';
-
+import DeleteIcon from '@mui/icons-material/Delete'; 
+import Loading from '../common/Loading';
 const ProjectCard = ({ project }) => {
   const navigate = useNavigate();
   const progress = (project.amountReceived / project.amountSanctioned) * 100;
-
+  const [loading, setLoading] = React.useState(false);
   const handleMarkCompleted = async (e) => {
     e.stopPropagation();
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append('completed', 'yes');
@@ -29,6 +31,21 @@ const ProjectCard = ({ project }) => {
     }
   };
 
+  const handleDeleteProject = async (e) => {
+    
+    e.stopPropagation();
+    try {
+      await axios.delete(`http://localhost:5000/project/delete/${project.projectId}`);
+      message.success('Project deleted successfully!');
+      window.location.reload(); 
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      message.error('Failed to delete project');
+    }
+  };
+  if(loading){
+    return <Loading />;
+  }
   return (
     <Card 
       onClick={() => navigate(`/project/${project.projectId}`)}
@@ -74,18 +91,18 @@ const ProjectCard = ({ project }) => {
               px: 1.5
             }} 
           />
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 600,
-              fontSize: '1.2rem',
-              lineHeight: 1.3,
-              color: '#1a1a1a'
-            }}
-          >
-            {project.projectTitle}
-          </Typography>
         </Box>
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            fontWeight: 600,
+            fontSize: '1.2rem',
+            lineHeight: 1.3,
+            color: '#1a1a1a'
+          }}
+        >
+          {project.projectTitle}
+        </Typography>
         
         <Typography 
           variant="body2" 
@@ -133,16 +150,27 @@ const ProjectCard = ({ project }) => {
           <Box sx={{ 
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'space-between',
             gap: 1,
             color: '#4caf50',
             mt: 2,
             pt: 2,
             borderTop: '1px solid #f0f0f0'
           }}>
-            <CheckCircleIcon fontSize="small" />
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              Completed
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CheckCircleIcon fontSize="small" />
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                Completed
+              </Typography>
+            </Box>
+            <DeleteIcon 
+              onClick={handleDeleteProject} 
+              sx={{ 
+                cursor: 'pointer', 
+                color: '#f44336', 
+                '&:hover': { color: '#d32f2f' }
+              }} 
+            />
           </Box>
         ) : (
           <Box sx={{ 
@@ -153,11 +181,21 @@ const ProjectCard = ({ project }) => {
             pt: 2,
             borderTop: '1px solid #f0f0f0'
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#64b5f6' }}>
-              <CheckCircleIcon fontSize="small" />
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                Ongoing
-              </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#64b5f6' }}>
+                <CheckCircleIcon fontSize="small" />
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  Ongoing
+                </Typography>
+              </Box>
+              <DeleteIcon 
+                onClick={handleDeleteProject} 
+                sx={{ 
+                  cursor: 'pointer', 
+                  color: '#f44336', 
+                  '&:hover': { color: '#d32f2f' }
+                }} 
+              />
             </Box>
             <Button 
               variant="outlined" 
