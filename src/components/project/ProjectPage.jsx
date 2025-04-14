@@ -47,19 +47,19 @@ const ProjectPage = () => {
     ) : (
       <Box sx={{
         p: { xs: 2, md: 4 },
-        maxWidth: 1200,
+        maxWidth: 1100,
         margin: '0 auto',
-        backgroundColor: '#f0f4f8', // Changed background color for better contrast
+        backgroundColor: '#f0f4f8', 
         minHeight: '100vh',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)', // Added shadow for depth
-        borderRadius: 3 // Added border radius for rounded corners
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)', 
+        borderRadius: 3 
       }}>
         <Paper
           elevation={3}
           sx={{
             p: { xs: 2, md: 4 },
             borderRadius: 3,
-            background: 'linear-gradient(to bottom, #ffffff, #f0f4f8)', // Updated gradient for subtle effect
+            background: 'linear-gradient(to bottom, #ffffff, #f0f4f8)', 
             border: '1px solid #eaeaea',
             position: 'relative'
           }}
@@ -75,7 +75,7 @@ const ProjectPage = () => {
               '&:hover': {
                 backgroundColor: '#0d47a1'
               },
-              boxShadow: '0 2px 4px rgba(0,0,0,0.2)' // Added shadow for button
+              boxShadow: '0 12px 14px rgba(0,0,0,0.2)' 
             }}
           >
             <EditIcon />
@@ -126,7 +126,7 @@ const ProjectPage = () => {
                   borderRadius: 2,
                   height: '100%',
                   border: '1px solid #eaeaea',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)' // Added shadow for depth
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)' 
                 }}
               >
                 <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#1a237e' }}>
@@ -161,7 +161,7 @@ const ProjectPage = () => {
                   borderRadius: 2,
                   height: '100%',
                   border: '1px solid #eaeaea',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)' // Added shadow for depth
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)' 
                 }}
               >
                 <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#1a237e' }}>
@@ -204,7 +204,7 @@ const ProjectPage = () => {
                   p: 3,
                   borderRadius: 2,
                   border: '1px solid #eaeaea',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)' // Added shadow for depth
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)' 
                 }}
               >
                 <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#1a237e' }}>
@@ -222,7 +222,7 @@ const ProjectPage = () => {
                   borderRadius: 2,
                   border: '1px solid #eaeaea',
                   mt: 4,
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)' // Added shadow for depth
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)' 
                 }}
               >
                 <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#1a237e' }}>
