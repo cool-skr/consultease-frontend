@@ -6,6 +6,7 @@ import { message } from 'antd';
 import DownloadIcon from '@mui/icons-material/Download';
 import EditIcon from '@mui/icons-material/Edit';
 import Loading from '../common/Loading';
+
 const ProjectPage = () => {
   const { projectId } = useParams();
   const [project, setProject] = useState(null);
@@ -27,11 +28,12 @@ const ProjectPage = () => {
     };
     fetchProject();
   }, [projectId]);
+
   useEffect(() => {
     if (project) {
       setProgress((project.amountReceived / project.amountSanctioned) * 100);
-    };
-  }, [project])
+    }
+  }, [project]);
 
   return (
     loading ? (
@@ -47,17 +49,19 @@ const ProjectPage = () => {
         p: { xs: 2, md: 4 },
         maxWidth: 1200,
         margin: '0 auto',
-        backgroundColor: '#f8f9fa',
-        minHeight: '100vh'
+        backgroundColor: '#f0f4f8', // Changed background color for better contrast
+        minHeight: '100vh',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)', // Added shadow for depth
+        borderRadius: 3 // Added border radius for rounded corners
       }}>
         <Paper
           elevation={3}
           sx={{
             p: { xs: 2, md: 4 },
             borderRadius: 3,
-            background: 'linear-gradient(to bottom, #ffffff, #fafafa)',
+            background: 'linear-gradient(to bottom, #ffffff, #f0f4f8)', // Updated gradient for subtle effect
             border: '1px solid #eaeaea',
-            position: 'relative'  // Added for absolute positioning of edit button
+            position: 'relative'
           }}
         >
           <IconButton
@@ -70,7 +74,8 @@ const ProjectPage = () => {
               color: 'white',
               '&:hover': {
                 backgroundColor: '#0d47a1'
-              }
+              },
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)' // Added shadow for button
             }}
           >
             <EditIcon />
@@ -120,7 +125,8 @@ const ProjectPage = () => {
                   p: 3,
                   borderRadius: 2,
                   height: '100%',
-                  border: '1px solid #eaeaea'
+                  border: '1px solid #eaeaea',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)' // Added shadow for depth
                 }}
               >
                 <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#1a237e' }}>
@@ -154,7 +160,8 @@ const ProjectPage = () => {
                   p: 3,
                   borderRadius: 2,
                   height: '100%',
-                  border: '1px solid #eaeaea'
+                  border: '1px solid #eaeaea',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)' // Added shadow for depth
                 }}
               >
                 <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#1a237e' }}>
@@ -196,7 +203,8 @@ const ProjectPage = () => {
                 sx={{
                   p: 3,
                   borderRadius: 2,
-                  border: '1px solid #eaeaea'
+                  border: '1px solid #eaeaea',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)' // Added shadow for depth
                 }}
               >
                 <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#1a237e' }}>
@@ -213,7 +221,8 @@ const ProjectPage = () => {
                   p: 3,
                   borderRadius: 2,
                   border: '1px solid #eaeaea',
-                  mt: 4
+                  mt: 4,
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)' // Added shadow for depth
                 }}
               >
                 <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#1a237e' }}>

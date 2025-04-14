@@ -27,10 +27,11 @@ const ProjectEditPage = () => {
       const formDataToSubmit = new FormData();
       const userEmail = localStorage.getItem('email');
       formDataToSubmit.append('email', userEmail);
-      formDataToSubmit.append('undeleted_agremeent', agreementLinks);
-      formDataToSubmit.append('undeleted_billSettlement', billLinks);
-      formDataToSubmit.append('deleted_agreement', deletedAgreementLinks);
-      formDataToSubmit.append('deleted_billSettlement', deletedBillLinks);
+      agreementLinks.forEach(link => formDataToSubmit.append('undeleted_agreement', link));
+      billLinks.forEach(link => formDataToSubmit.append('undeleted_billSettlement', link));
+      deletedAgreementLinks.forEach(link => formDataToSubmit.append('deleted_agreement', link));
+      deletedBillLinks.forEach(link => formDataToSubmit.append('deleted_billSettlement', link));
+
       Object.keys(values).forEach(key => {
         if (key === 'projectDuration') {
           const [start, end] = values[key];
@@ -414,18 +415,18 @@ const ProjectEditPage = () => {
             </Upload>
             
           </Form.Item>
-          {
-              billLinks.map((link, index) => (
-                <FileItem
-                  key={index}
-                  href={link}
-                  onDelete={() => {
-                    setDeletedBillLinks((prev) => [...prev, link]);
-                    setBillLinks((prev) => prev.filter((item) => item !== link)); 
-                  }}
-                />
-              ))
-          }
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {billLinks.map((link, index) => (
+              <FileItem
+                key={index}
+                href={link}
+                onDelete={() => {
+                  setDeletedBillLinks((prev) => [...prev, link]);
+                  setBillLinks((prev) => prev.filter((item) => item !== link)); 
+                }}
+              />
+            ))}
+          </div>
           </div><div style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
@@ -458,6 +459,7 @@ const ProjectEditPage = () => {
               </Button>
             </Upload>
           </Form.Item>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {
               agreementLinks.map((link, index) => (
                 <FileItem
@@ -470,6 +472,7 @@ const ProjectEditPage = () => {
                 />
               ))
           }
+          </div>
         </div>
         </div>
         <Form.Item
