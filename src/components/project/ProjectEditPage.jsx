@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, DatePicker, Upload, Button, InputNumber, message, Typography as AntTypography, Select } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
-import { AppBar, Toolbar, Typography as MuiTypography } from '@mui/material';
+import { AppBar, Toolbar, Typography as MuiTypography, Box } from '@mui/material';
 import FileItem from '../common/FileItem';
+import Loading from '../common/Loading';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -14,7 +15,7 @@ const { Title } = AntTypography;
 const ProjectEditPage = () => {
   const [form] = Form.useForm();
   const [project, setProject] = useState([]);
-  
+  const[loading, setLoading] = useState(true);
   const[agreementLinks, setAgreementLinks] = useState([]);
   const[deletedAgreementLinks, setDeletedAgreementLinks] = useState([]);
   const[billLinks, setBillLinks] = useState([]);
@@ -24,6 +25,7 @@ const ProjectEditPage = () => {
   const navigate = useNavigate();
   const onFinish = async (values) => {
     try {
+      setLoading(true);
       const formDataToSubmit = new FormData();
       const userEmail = localStorage.getItem('email');
       formDataToSubmit.append('email', userEmail);
@@ -55,13 +57,17 @@ const ProjectEditPage = () => {
 
       if (response.data) {
         message.success('Project details submitted successfully!');
+        setLoading(false);
         form.resetFields();
+        navigate('/');
       }
     } catch (error) {
       message.error('Failed to submit project details');
+
       console.error('Submission error:', error);
+      setLoading(false);
     } finally {
-      // navigate('/');
+
     }
   };
 
@@ -133,9 +139,13 @@ const ProjectEditPage = () => {
     if (project?.agreement) {
       setAgreementLinks(project.agreement.split(',').map(link => link.trim())); 
     }
+    setLoading(false);
   }, [project, form]); 
 
-
+  if(loading) return (
+  <Box sx={{margin: '40px'}}>
+    <Loading />
+  </Box>);
   return (
     <>
       <AppBar position="static" sx={{
