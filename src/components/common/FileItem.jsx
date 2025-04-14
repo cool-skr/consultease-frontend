@@ -1,12 +1,35 @@
 import React from 'react';
+import { Typography, Button, Tooltip } from 'antd';
+import {
+  PaperClipOutlined,
+  DeleteOutlined,
+  CopyOutlined,
+} from '@ant-design/icons';
+
+const { Link } = Typography;
 
 const FileItem = ({ href, onDelete }) => {
   return (
     <div style={styles.container}>
-      <a href={href} target="_blank" rel="noopener noreferrer" style={styles.link}>
-        {href}
-      </a>
-      <button onClick={() => onDelete(href)} style={styles.deleteButton}>Delete</button>
+      <PaperClipOutlined style={{ color: '#595959', marginRight: 6 }} />
+      <Link
+        href={href}
+        target="_blank"
+        copyable
+        ellipsis
+        style={styles.link}
+      >
+        {href.trim()}
+      </Link>
+      <Tooltip title="Remove">
+        <Button
+          type="text"
+          icon={<DeleteOutlined />}
+          size="small"
+          danger
+          onClick={() => onDelete()}
+        />
+      </Tooltip>
     </div>
   );
 };
@@ -14,24 +37,25 @@ const FileItem = ({ href, onDelete }) => {
 const styles = {
   container: {
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '10px',
-    borderBottom: '1px solid #ccc',
-    marginBottom: '8px',
+    borderRadius: 8,
+    gap: 8,
+    maxWidth: 800,
+    overflow: 'hidden',
+  },
+  name: {
+    fontWeight: 500,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: 160,
   },
   link: {
-    textDecoration: 'none',
-    color: '#007BFF',
-    fontSize: '16px',
-  },
-  deleteButton: {
-    backgroundColor: '#FF4C4C',
-    color: 'white',
-    border: 'none',
-    padding: '5px 10px',
-    borderRadius: '4px',
-    cursor: 'pointer',
+    flex: 1,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    marginLeft: 8,
   },
 };
 

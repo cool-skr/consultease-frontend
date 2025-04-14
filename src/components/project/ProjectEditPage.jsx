@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Input, DatePicker, Upload, Button, InputNumber, message, Typography as AntTypography, Select } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { AppBar, Toolbar, Typography as MuiTypography } from '@mui/material';
+import FileItem from '../common/FileItem';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -9,14 +10,15 @@ import { useNavigate } from 'react-router-dom';
 const { TextArea } = Input;
 const { Title } = AntTypography;
 
+
 const ProjectEditPage = () => {
   const [form] = Form.useForm();
   const [project, setProject] = useState([]);
-  const [billFiles, setBillFiles] = useState([]);
-  const [agreementFiles, setAgreementFiles] = useState([]);
-
+  
   const[agreementLinks, setAgreementLinks] = useState([]);
+  const[deletedAgreementLinks, setDeletedAgreementLinks] = useState([]);
   const[billLinks, setBillLinks] = useState([]);
+  const [deletedBillLinks, setDeletedBillLinks] = useState([]);
 
   const { projectId } = useParams();
   const navigate = useNavigate();
@@ -25,41 +27,15 @@ const ProjectEditPage = () => {
       const formDataToSubmit = new FormData();
       const userEmail = localStorage.getItem('email');
       formDataToSubmit.append('email', userEmail);
+      formDataToSubmit.append('undeleted_agremeent', agreementLinks);
+      formDataToSubmit.append('undeleted_billSettlement', billLinks);
+      formDataToSubmit.append('deleted_agreement', deletedAgreementLinks);
+      formDataToSubmit.append('deleted_billSettlement', deletedBillLinks);
       Object.keys(values).forEach(key => {
         if (key === 'projectDuration') {
           const [start, end] = values[key];
           formDataToSubmit.append(key, `${start.format('DD MMMM YYYY')} - ${end.format('DD MMMM YYYY')}`);
         } else if (key === 'billSettlement' || key === 'agreement') {
-          if (key === 'billSettlement') {
-            let deleted_billSettlement = [], undeleted_billSettlement = [];
-            if (values[key]?.fileList?.length > 0) {
-              values[key].fileList.forEach((file) => {
-                if (file.url) {
-                  if (billLinks.includes(file.url)) {
-                    undeleted_billSettlement.push(file.url);
-                  }
-                }
-              });
-            }
-            deleted_billSettlement = billLinks.filter((link) => !undeleted_billSettlement.includes(link));
-            formDataToSubmit.append('undeleted_billSettlement', undeleted_billSettlement);
-            formDataToSubmit.append('deleted_billSettlement', deleted_billSettlement);
-          }
-          if (key === 'agreement') {
-            let deleted_agreement = [], undeleted_agreement = [];
-            if (values[key]?.fileList?.length > 0) {
-              values[key].fileList.forEach((file) => {
-                if (file.url) {
-                  if (agreementLinks.includes(file.url)) {
-                    undeleted_agreement.push(file.url);
-                  }
-                }
-              });
-            }
-            deleted_agreement = agreementLinks.filter((link) => !undeleted_agreement.includes(link)); // Corrected to use agreementLinks
-            formDataToSubmit.append('undeleted_agreement', undeleted_agreement); 
-            formDataToSubmit.append('deleted_agreement', deleted_agreement);
-          }
           if (values[key]?.fileList?.length > 0) {
             values[key].fileList.forEach((file) => {
               if (!file.url) formDataToSubmit.append(`${key}`, file.originFileObj);
@@ -152,25 +128,10 @@ const ProjectEditPage = () => {
     }
     if (project?.billSettlement) {
       setBillLinks(project.billSettlement.split(',').map(link => link.trim())); 
-      const links = project.billSettlement.split(',').map((link, index) => ({
-        uid: `bill-${index}`,
-        name: `bill-${index + 1}.pdf`,
-        status: 'done',
-        url: link.trim(),
-      }));
-      setBillFiles(links);
     }
     if (project?.agreement) {
       setAgreementLinks(project.agreement.split(',').map(link => link.trim())); 
-      const links = project.agreement.split(',').map((link, index) => ({
-        uid: `agreement-${index}`,
-        name: `agreement-${index + 1}.pdf`,
-        status: 'done',
-        url: link.trim(),
-      }));
-      setAgreementFiles(links); 
     }
-
   }, [project, form]); 
 
 
@@ -419,20 +380,19 @@ const ProjectEditPage = () => {
           </Form.Item>
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '30px',
-          marginBottom: '30px'
-        }}>
+        <div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '30px',
+            marginBottom: '30px'
+          }}>
           <Form.Item
             name="billSettlement"
             label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Bill Settlement Details</span>}
             
           >
-            <Upload {...uploadProps} fileList={billFiles} onChange={info=>{
-              setBillFiles(info.fileList);
-            }}>
+            <Upload {...uploadProps}>
               <Button
                 icon={<UploadOutlined />}
                 size="large"
@@ -452,16 +412,32 @@ const ProjectEditPage = () => {
                 Upload PDF
               </Button>
             </Upload>
+            
           </Form.Item>
-
+          {
+              billLinks.map((link, index) => (
+                <FileItem
+                  key={index}
+                  href={link}
+                  onDelete={() => {
+                    setDeletedBillLinks((prev) => [...prev, link]);
+                    setBillLinks((prev) => prev.filter((item) => item !== link)); 
+                  }}
+                />
+              ))
+          }
+          </div><div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '30px',
+            marginBottom: '30px'
+          }}>
           <Form.Item
             name="agreement"
             label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Signed Agreement Document</span>}
             
           >
-            <Upload {...uploadProps} fileList={agreementFiles} onChange={(info)=>{
-              setAgreementFiles(info.fileList);
-            }}>
+            <Upload {...uploadProps}>
               <Button
                 icon={<UploadOutlined />}
                 size="large"
@@ -482,8 +458,20 @@ const ProjectEditPage = () => {
               </Button>
             </Upload>
           </Form.Item>
+          {
+              agreementLinks.map((link, index) => (
+                <FileItem
+                  key={index}
+                  href={link}
+                  onDelete={() => {
+                    setDeletedAgreementLinks((prev) => [...prev, link]);
+                    setAgreementLinks((prev) => prev.filter((item) => item !== link)); 
+                  }}
+                />
+              ))
+          }
         </div>
-
+        </div>
         <Form.Item
           name="studentDetails"
           label={<span style={{ fontSize: '15px', fontWeight: 500, color: '#2c2c2c' }}>Student Details</span>}
